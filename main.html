@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  </head>
+  <body>
+    <div>y=2x+6</div>
+    <input type="number" id="X" placeholder="ingrese el valor que tendra x:" />
+    <button onclick="prepararmodelos()" id="boton">Preparar el modelo</button>
+    <button onclick="predecir()">Predecir Y</button>
+    <p id="resultado"></p>
+  </body>
+  <script>
+    let model;
+    async function prepararmodelos() {
+      document.getElementById("boton").innerHTML =
+        "espere a que el modelo este listo";
+      model = tf.sequential();
+
+      model.add(tf.layers.dense({ units: 1, inputShape: [1] }));
+
+      model.compile({
+        loss: "meanSquaredError",
+        optimizer: "sgd",
+      });
+
+      const xs = tf.tensor2d([-6, -5, -4, -3, -2, -1, 0, 1, 2], [9, 1]);
+      const ys = tf.tensor2d([-6, -4, -2, 0, 2, 4, 6, 8, 10], [9, 1]);
+      await model.fit(xs, ys, { epochs: 350 });
+      document.getElementById("boton").innerHTML = "Modelo Listo";
+    }
+    function predecir() {
+      const X = document.getElementById("X").value;
+
+      if (!model) {
+        alert("Primero entrena el modelo");
+        return;
+      }
+      const resultado = model.predict(tf.tensor2d([Number(X)], [1, 1]));
+      resultado.print();
+
+      document.getElementById("resultado").innerHTML =
+        "Resultado:" + resultado.dataSync()[0];
+    }
+  </script>
+</html>
